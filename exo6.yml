@@ -1,0 +1,222 @@
+
+openapi: 3.0.0
+
+info:
+  title: API Gestion Profils Utilisateurs
+  version: 1.0.0
+  description: API pour créer et updater des profils utilisateurs de manière ciblée.
+
+paths:
+  /users:
+    post:
+      summary: Crée des utilisateurs
+      description: Crée une liste d'utilisateurs sans IDs, renvoie avec IDs.
+      requestBody:
+        description: Liste de profils à créer sans ID.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CreateUserProfile'
+            example:
+              - first_name: "Jean"
+                last_name: "Dupont"
+                birthdate: "2000-01-01"
+                email: "jean@example.com"
+                address_street: "Rue Exemple"
+                address_city: "Paris"
+                address_country: "France"
+                address_postal_code: 75001
+                needs_newsletter: true
+                language: "fr"
+      responses:
+        '201':
+          description: Utilisateurs créés.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserProfile'
+              example:
+                - identifier: "user123"
+                  first_name: "Jean"
+                  last_name: "Dupont"
+                  birthdate: "2000-01-01"
+                  email: "jean@example.com"
+                  address_street: "Rue Exemple"
+                  address_city: "Paris"
+                  address_country: "France"
+                  address_postal_code: 75001
+                  needs_newsletter: true
+                  language: "fr"
+  /users/{id}:
+    get:
+      summary: Récupère un profil utilisateur
+      description: Retourne toutes les infos du profil.
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Profil trouvé.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+              example:
+                identifier: "user123"
+                first_name: "Jean"
+                last_name: "Dupont"
+                birthdate: "2000-01-01"
+                email: "jean@example.com"
+                address_street: "Rue Exemple"
+                address_city: "Paris"
+                address_country: "France"
+                address_postal_code: 75001
+                needs_newsletter: true
+                language: "fr"
+  /users/{id}/personalInfo:
+    put:
+      summary: Met à jour les infos personnelles
+      description: Update seulement personal info.
+      parameters:
+        - $ref: '#/components/parameters/id'
+      requestBody:
+        description: Infos personnelles à updater.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonalInfo'
+              first_name: "Jean"
+              last_name: "Dupont"
+              birthdate: "2000-01-01"
+              email: "jean@example.com"
+      responses:
+        '200':
+          description: Infos mises à jour.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonalInfo'
+              example:
+                first_name: "Jean"
+                last_name: "Dupont"
+                birthdate: "2000-01-01"
+                email: "jean@example.com"
+  /users/{id}/address:
+    put:
+      summary: Met à jour l'adresse
+      description: Update seulement l'adresse.
+      parameters:
+        - $ref: '#/components/parameters/id'
+      requestBody:
+        description: Adresse à updater.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Address'
+            example:
+              address_street: "Rue Exemple"
+              address_city: "Paris"
+              address_country: "France"
+              address_postal_code: 75001
+      responses:
+        '200':
+          description: Adresse mise à jour.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Address'
+              example:
+                address_street: "Rue Exemple"
+                address_city: "Paris"
+                address_country: "France"
+                address_postal_code: 75001
+  /users/{id}/preferences:
+    put:
+      summary: Met à jour les préférences
+      description: Update seulement les préférences.
+      parameters:
+        - $ref: '#/components/parameters/id'
+      requestBody:
+        description: Préférences à updater.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Preferences'
+            example:
+              needs_newsletter: true
+              language: "fr"
+      responses:
+        '200':
+          description: Préférences mises à jour.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Preferences'
+              example:
+                needs_newsletter: true
+                language: "fr"
+
+components:
+  schemas:
+    PersonalInfo:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        birthdate:
+          type: string
+          format: date
+        email:
+          type: string
+          format: email
+    Address:
+      type: object
+      properties:
+        address_street:
+          type: string
+        address_city:
+          type: string
+        address_country:
+          type: string
+        address_postal_code:
+          type: integer
+    Preferences:
+      type: object
+      properties:
+        needs_newsletter:
+          type: boolean
+        language:
+          type: string
+          enum:
+            - mg
+            - fr
+            - eng
+    CreateUserProfile:
+      allOf:
+        - $ref: '#/components/schemas/PersonalInfo'
+        - $ref: '#/components/schemas/Address'
+        - $ref: '#/components/schemas/Preferences'
+    UserProfile:
+      allOf:
+        - type: object
+          properties:
+            identifier:
+              type: string
+        - $ref: '#/components/schemas/CreateUserProfile'
+  parameters:
+    id:
+      name: id
+      in: path
+      description: Identifiant de l'utilisateur.
+      required: true
+      schema:
+        type: string
