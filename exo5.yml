@@ -1,0 +1,154 @@
+openapi: 3.0.0
+
+info:
+  title: API Produits et Commandes
+  version: 1.0.0
+  description: API avec produits et commandes, authentification.
+
+paths:
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Recherche de produits
+      description: Retourne une liste de produits.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/q'
+      responses:
+        '200':
+          description: Liste de produits.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+              examples:
+                multiple:  
+                  value:
+                    - name: "Produit A"
+                      expiration_datetime: "2025-12-31T23:59:59Z"
+                      price: 10.99
+                empty:
+                  value: []
+  /orders:
+    get:
+      tags:
+        - Orders
+      summary: Liste des commandes paginée
+      description: Retourne une liste paginée de commandes.
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+      responses:
+        '200':
+          description: Liste des commandes.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+              examples:
+                multiple:
+                  value:
+                    - identifier: 1
+                      customer_name: "Bob"
+                      creation_datetime: "2025-01-01T12:00:00Z"
+                      total_amount: 30.49
+                empty:
+                  value: []
+    post:
+      tags:
+        - Orders
+      summary: Crée une commande
+      description: Crée une nouvelle commande (auth requise).
+      security:
+        - basicAuth: []
+      requestBody:
+        description: Détails de la commande à créer.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+            example:
+              identifier: 2
+              customer_name: "Charlie"
+              creation_datetime: "2025-02-01T13:00:00Z"
+              total_amount: 45.00
+      responses:
+        '201':
+          description: Commande créée.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+              example:
+                identifier: 2
+                customer_name: "Charlie"
+                creation_datetime: "2025-02-01T13:00:00Z"
+                total_amount: 45.00
+
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        name:
+          type: string
+        expiration_datetime:
+          type: string
+          format: date-time
+        price:
+          type: number
+          format: float
+    Order:
+      type: object
+      properties:
+        identifier:  
+          type: integer
+        customer_name:
+          type: string
+        creation_datetime:
+          type: string
+          format: date-time
+        total_amount:
+          type: number
+          format: float
+  parameters:
+    limit:
+      name: limit
+      in: query
+      description: Nombre maximum d'éléments.
+      required: false
+      schema:
+        type: integer
+    q:
+      name: q
+      in: query
+      description: Terme de recherche.
+      required: false
+      schema:
+        type: string
+    page:
+      name: page
+      in: query
+      description: Numéro de page.
+      required: false
+      schema:
+        type: integer
+      example: 1
+    size:
+      name: size
+      in: query
+      description: Taille de la page.
+      required: false
+      schema:
+        type: integer
+      example: 20
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
