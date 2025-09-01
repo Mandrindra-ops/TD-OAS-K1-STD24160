@@ -80,7 +80,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Task'
-        '404':  # Non trouvé.
+        '404':
           description: Tâche non trouvée.
           content:
             application/json:
